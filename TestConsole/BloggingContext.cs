@@ -6,9 +6,20 @@ namespace TestConsole
 {
     public class BloggingContext : DbContext
     {
+        private readonly string _hubUrl = "http://localhost:5000/dabeehub";
+        private readonly TimeSpan? _delay;
+
+        public BloggingContext(
+            string hubUrl,
+            TimeSpan? delay = null)
+        {
+            _hubUrl = hubUrl;
+            _delay = delay;
+        }
+
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
             => optionsBuilder
-                .UseShoMeDaBe("http://localhost:5000/dabeehub", TimeSpan.FromMilliseconds(1000))
+                .UseShoMeDaBe(_hubUrl, _delay)
                 .UseInMemoryDatabase("Spleen");
 
         public DbSet<Blog> Blogs { get; set; }

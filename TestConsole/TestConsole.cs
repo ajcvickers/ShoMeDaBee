@@ -6,20 +6,26 @@ namespace TestConsole
 {
     public class TestConsole
     {
-        public static async Task Main()
+        public static async Task Main(string[] args)
         {
             Console.WriteLine("Running...");
 
-            using (var context = new BloggingContext())
+            var hubUrl = args[0];
+            var delay = args.Length > 1 ? (TimeSpan?)TimeSpan.FromMilliseconds(int.Parse(args[1])) : null;
+
+            using (var context = new BloggingContext(hubUrl, delay))
             {
-                context.Add(new Blog
+                for (int i = 0; i < 4; i++)
                 {
-                    Posts = new List<Post>
-                                {
-                                    new Post(),
-                                    new Post()
-                                }
-                });
+                    context.Add(new Blog
+                    {
+                        Posts = new List<Post>
+                        {
+                            new Post(),
+                            new Post()
+                        }
+                    });
+                }
 
                 context.SaveChanges();
             }

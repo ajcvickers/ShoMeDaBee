@@ -1,26 +1,28 @@
-﻿using Microsoft.AspNetCore.SignalR;
+﻿using System.Threading.Tasks;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
+using ShoMeDaBee.Internal;
 
 namespace ShoMeDaBee
 {
-    public abstract class DaBeeHub : Hub, IDaBeeSession
+    public class DaBeeHub : Hub
     {
-        public abstract IDaBeeSession Session { get; }
+        public virtual DaBeeSession Session => DaBeeSession.Current;
 
-        public virtual void StartSession(string contextName)
-            => Session.StartSession(contextName);
+        public virtual Task StartSession(string contextName)
+            => Session.StartSession(this, contextName);
 
-        public virtual void ChangeState(
+        public virtual Task ChangeState(
             string entityType,
             EntityState oldState,
             EntityState newState,
             bool fromQuery)
-            => Session.ChangeState(entityType, oldState, newState, fromQuery);
+            => Session.ChangeState(this, entityType, oldState, newState, fromQuery);
 
-        public virtual void SaveStarting()
-            => Session.SaveStarting();
+        public virtual Task SaveStarting()
+            => Session.SaveStarting(this);
 
-        public virtual void SaveCompleted(int saved)
-            => Session.SaveCompleted(saved);
+        public virtual Task SaveCompleted(int saved)
+            => Session.SaveCompleted(this, saved);
     }
 }

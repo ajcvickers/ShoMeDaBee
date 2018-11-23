@@ -1,29 +1,31 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 
 namespace ShoMeDaBee.Internal
 {
-    public class DaBeeSession : IDaBeeSession
+    public class DaBeeSession
     {
-        private readonly IDaBeeViewer _viewer;
+        public static DaBeeSession Current { get; } = new DaBeeSession();
+
+        private readonly DaBeeClientProxy _client;
         private readonly IDictionary<string, int[]> _tracked = new Dictionary<string, int[]>();
 
         private (string EntityType, EntityState OldState, EntityState NewState, bool FromQuery) _lastStateChange;
         private int _stateChangeCount;
         private bool _inSave;
 
-        public DaBeeSession(IDaBeeViewer viewer)
+        public DaBeeSession()
         {
-            _viewer = viewer;
+            _client = new DaBeeClientProxy();
         }
 
-        public virtual void StartSession(string contextName)
-        {
-            _viewer.Reset(contextName);
-        }
+        public virtual Task StartSession(DaBeeHub hub, string contextName) 
+            => _client.Reset(hub, contextName);
 
-        public virtual void ChangeState(
+        public virtual async Task ChangeState(
+            DaBeeHub hub,
             string entityType,
             EntityState oldState,
             EntityState newState,
@@ -38,13 +40,13 @@ namespace ShoMeDaBee.Internal
 
                 if (oldState == EntityState.Detached)
                 {
-                    _viewer.PatchEvent(!fromQuery
+                    await _client.PatchEvent(hub, !fromQuery
                         ? $"Attached {_stateChangeCount} '{entityType}' as {newState}"
                         : $"Query tracked {_stateChangeCount} '{entityType}'");
                 }
                 else
                 {
-                    _viewer.PatchEvent(_inSave
+                    await _client.PatchEvent(hub, _inSave
                         ? $"Saved {_stateChangeCount} '{entityType}'"
                         : $"Changed {_stateChangeCount} '{entityType}' from {oldState} to {newState}");
                 }
@@ -53,13 +55,13 @@ namespace ShoMeDaBee.Internal
             {
                 if (oldState == EntityState.Detached)
                 {
-                    _viewer.AddEvent(!fromQuery
+                    await _client.AddEvent(hub, !fromQuery
                         ? $"Attached '{entityType}' as {newState}"
                         : $"Query tracked '{entityType}'");
                 }
                 else
                 {
-                    _viewer.AddEvent(_inSave
+                    await _client.AddEvent(hub, _inSave
                         ? $"Saved '{entityType}'"
                         : $"Changed '{entityType}' from {oldState} to {newState}");
                 }
@@ -85,21 +87,21 @@ namespace ShoMeDaBee.Internal
 
             _tracked[entityType] = counts;
 
-            _viewer.UpdateTracking(_tracked.Select(e => (e.Key, e.Value)));
+            await _client.UpdateTracking(hub, _tracked.Select(e => (e.Key, e.Value)));
         }
 
-        public void SaveStarting()
+        public Task SaveStarting(DaBeeHub hub)
         {
             _inSave = true;
             
-            _viewer.AddEvent("Saving changes...");
+            return _client.AddEvent(hub, "Saving changes...");
         }
 
-        public void SaveCompleted(int saved)
+        public Task SaveCompleted(DaBeeHub hub, int saved)
         {
             _inSave = false;
 
-            _viewer.AddEvent($"Completed save of {saved} entities");
+            return _client.AddEvent(hub, $"Completed save of {saved} entities");
         }
     }
 }
