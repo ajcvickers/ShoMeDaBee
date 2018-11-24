@@ -35,3 +35,37 @@ body {
         display: none;
     }
 }
+
+.trackingSpace {
+    display: block;
+    padding: 9.5px;
+    margin: 0 0 10px;
+    font-size: 13px;
+    line-height: 1.42857143;
+    color: #333;
+    background-color: #f5f5f5;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    height: 280px;
+    overflow: auto;
+}
+
+.trackingOuterTd {
+    width: 25%;
+    padding: 5px;
+    vertical-align: top;
+}
+
+.trackingInnerTable {
+    border: 1px solid #ccc;
+    background: white;
+}
+
+.trackingInnerTh {
+    width: 250px;
+    padding: 5px;
+}
+
+.trackingInnerTd {
+    padding-left: 15px;
+}

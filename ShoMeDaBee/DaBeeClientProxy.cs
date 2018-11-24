@@ -1,21 +1,28 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.SignalR;
+using ShoMeDaBee.Internal;
 
 namespace ShoMeDaBee
 {
-    public class DaBeeClientProxy
+    public static class DaBeeClientProxy
     {
-        public Task Reset(DaBeeHub hub, string contextName) 
+        public static Task Reset(this DaBeeHub hub, string contextName) 
             => hub.Clients.All.SendAsync(nameof(Reset), contextName);
 
-        public Task AddEvent(DaBeeHub hub, string message)
+        public static Task AddEvent(this DaBeeHub hub, string message)
             => hub.Clients.All.SendAsync(nameof(AddEvent), message);
 
-        public Task PatchEvent(DaBeeHub hub, string message)
+        public static Task PatchEvent(this DaBeeHub hub, string message)
             => hub.Clients.All.SendAsync(nameof(PatchEvent), message);
 
-        public Task UpdateTracking(DaBeeHub hub, IEnumerable<(string EntityType, int[] StateCounts)> tracked)
-            => hub.Clients.All.SendAsync(nameof(UpdateTracking), tracked);
+        public static Task Track(this DaBeeHub hub, DaBeeEntityEntry entry)
+            => hub.Clients.All.SendAsync(nameof(Track), entry);
+
+        public static Task Untrack(this DaBeeHub hub, DaBeeEntityEntry entry)
+            => hub.Clients.All.SendAsync(nameof(Untrack), entry);
+
+        public static Task Update(this DaBeeHub hub, DaBeeEntityEntry entry)
+            => hub.Clients.All.SendAsync(nameof(Update), entry);
     }
 }

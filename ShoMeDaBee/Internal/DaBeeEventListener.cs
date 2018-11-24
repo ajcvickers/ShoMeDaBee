@@ -6,7 +6,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.EntityFrameworkCore.Internal;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace ShoMeDaBee.Internal
 {
@@ -14,6 +13,7 @@ namespace ShoMeDaBee.Internal
     {
         private readonly TimeSpan? _delay;
         private readonly HubConnection _connection;
+        private readonly IDictionary<object, Guid> _trackingGuids = new Dictionary<object, Guid>();
 
         public DaBeeEventListener(string hubUrl, TimeSpan? delay)
         {
@@ -50,11 +50,13 @@ namespace ShoMeDaBee.Internal
 
         private void Tracked(object sender, EntityTrackedEventArgs args)
         {
+            var trackingGuid = Guid.NewGuid();
+            _trackingGuids[args.Entry.Entity] = trackingGuid;
+
             _connection.InvokeAsync(
-                nameof(DaBeeHub.ChangeState), 
-                args.Entry.Metadata.ShortName(), 
-                EntityState.Detached, 
-                args.Entry.State, 
+                nameof(DaBeeHub.ChangeState),
+                new DaBeeEntityEntry(args.Entry, trackingGuid),
+                EntityState.Detached,
                 args.FromQuery);
 
             IntroduceDelay();
@@ -72,9 +74,8 @@ namespace ShoMeDaBee.Internal
         {
             _connection.InvokeAsync(
                 nameof(DaBeeHub.ChangeState),
-                args.Entry.Metadata.ShortName(),
+                new DaBeeEntityEntry(args.Entry, _trackingGuids[args.Entry.Entity]),
                 args.OldState,
-                args.NewState,
                 false);
 
             IntroduceDelay();

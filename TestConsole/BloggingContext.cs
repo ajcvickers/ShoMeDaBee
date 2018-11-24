@@ -6,7 +6,7 @@ namespace TestConsole
 {
     public class BloggingContext : DbContext
     {
-        private readonly string _hubUrl = "http://localhost:5000/dabeehub";
+        private readonly string _hubUrl;
         private readonly TimeSpan? _delay;
 
         public BloggingContext(

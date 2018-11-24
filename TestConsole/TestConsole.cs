@@ -15,8 +15,10 @@ namespace TestConsole
 
             using (var context = new BloggingContext(hubUrl, delay))
             {
+                Console.Write("Adding");
                 for (int i = 0; i < 4; i++)
                 {
+                    Console.Write(".");
                     context.Add(new Blog
                     {
                         Posts = new List<Post>
@@ -27,10 +29,13 @@ namespace TestConsole
                     });
                 }
 
+                Console.WriteLine();
+                Console.WriteLine("Saving...");
                 context.SaveChanges();
+                Console.WriteLine("Saved");
             }
 
-            Console.WriteLine("Ending...");
+            Console.WriteLine("Done");
             Console.ReadLine();
 
             //var connection = new HubConnectionBuilder()

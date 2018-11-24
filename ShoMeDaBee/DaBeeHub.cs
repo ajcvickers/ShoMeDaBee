@@ -13,11 +13,10 @@ namespace ShoMeDaBee
             => Session.StartSession(this, contextName);
 
         public virtual Task ChangeState(
-            string entityType,
+            DaBeeEntityEntry entityEntry,
             EntityState oldState,
-            EntityState newState,
             bool fromQuery)
-            => Session.ChangeState(this, entityType, oldState, newState, fromQuery);
+            => Session.ChangeState(this, entityEntry, oldState, fromQuery);
 
         public virtual Task SaveStarting()
             => Session.SaveStarting(this);

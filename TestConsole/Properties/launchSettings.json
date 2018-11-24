@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "TestConsole": {
+      "commandName": "Project",
+      "commandLineArgs": "https://localhost:44382/dabeehub 10"
+    }
+  }
+}
